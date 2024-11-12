@@ -24,11 +24,20 @@ public final class LibCore {
         runtime.registerJavaFunction("not-equals?", ne, onDuplicate);
         runtime.registerJavaFunction("!=", ne, onDuplicate);
         runtime.registerJavaFunction("<>", ne, onDuplicate);
+        runtime.registerJavaFunction("<", lessThan, onDuplicate);
+        runtime.registerJavaFunction(">", greaterThan, onDuplicate);
+        runtime.registerJavaFunction("<=", lessThanOrEquals, onDuplicate);
+        runtime.registerJavaFunction(">=", greaterThanOrEquals, onDuplicate);
         runtime.registerJavaFunction("and", and, onDuplicate);
         runtime.registerJavaFunction("or", or, onDuplicate);
         runtime.registerJavaFunction("struct", struct, onDuplicate);
         runtime.registerJavaFunction("struct-get", structGet, onDuplicate);
         runtime.registerJavaFunction("struct-set!", structSet, onDuplicate);
+        runtime.registerJavaFunction("str->int", parseInt, onDuplicate);
+        runtime.registerJavaFunction("parse-int", parseInt, onDuplicate);
+        runtime.registerJavaFunction("str->float", parseFloat, onDuplicate);
+        runtime.registerJavaFunction("parse-float", parseFloat, onDuplicate);
+        runtime.registerJavaFunction("to-string", toString, onDuplicate);
     }
 
     private static final String SINKRATE = "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED";
@@ -111,6 +120,106 @@ public final class LibCore {
         return !Objects.equals(args[0], args[1]);
     };
 
+    private static final FunctionValue lessThan = args -> {
+        if (args.length != 2) {
+            throw new PL5Exception(String.format("< expects 2 arguments, got %d", args.length), nameof("lessThan"));
+        }
+
+        Object arg1 = args[0];
+        Object arg2 = args[1];
+        if (arg1 == null || arg2 == null) {
+            throw new PL5Exception(String.format("< expects two non-null arguments, got %s and %s", arg1, arg2), nameof("lessThan"));
+        }
+        else if (arg1 instanceof String s1 && arg2 instanceof String s2) {
+            return s1.compareTo(s2) < 0;
+        } else if (arg1 instanceof Long l1 && arg2 instanceof Long l2) {
+            return l1 < l2;
+        } else if (arg1 instanceof Number n1 && arg2 instanceof Number n2) {
+            return n1.doubleValue() < n2.doubleValue();
+        } else if (arg1.getClass().equals(arg2.getClass()) && arg1 instanceof Comparable<?> comparable) {
+            @SuppressWarnings("unchecked")
+            Comparable<Object> c1 = (Comparable<Object>) comparable;
+            return c1.compareTo(arg2) < 0;
+        } else {
+            throw new PL5Exception(String.format("< expects two comparable arguments, got %s and %s", arg1, arg2), nameof("lessThan"));
+        }
+    };
+
+    private static final FunctionValue greaterThan = args -> {
+        if (args.length != 2) {
+            throw new PL5Exception(String.format("> expects 2 arguments, got %d", args.length), nameof("greaterThan"));
+        }
+
+        Object arg1 = args[0];
+        Object arg2 = args[1];
+        if (arg1 == null || arg2 == null) {
+            throw new PL5Exception(String.format("> expects two non-null arguments, got %s and %s", arg1, arg2), nameof("greaterThan"));
+        }
+        else if (arg1 instanceof String s1 && arg2 instanceof String s2) {
+            return s1.compareTo(s2) > 0;
+        } else if (arg1 instanceof Long l1 && arg2 instanceof Long l2) {
+            return l1 > l2;
+        } else if (arg1 instanceof Number n1 && arg2 instanceof Number n2) {
+            return n1.doubleValue() > n2.doubleValue();
+        } else if (arg1.getClass().equals(arg2.getClass()) && arg1 instanceof Comparable<?> comparable) {
+            @SuppressWarnings("unchecked")
+            Comparable<Object> c1 = (Comparable<Object>) comparable;
+            return c1.compareTo(arg2) > 0;
+        } else {
+            throw new PL5Exception(String.format("> expects two comparable arguments, got %s and %s", arg1, arg2), nameof("greaterThan"));
+        }
+    };
+
+    private static final FunctionValue lessThanOrEquals = args -> {
+        if (args.length != 2) {
+            throw new PL5Exception(String.format("<= expects 2 arguments, got %d", args.length), nameof("lessThanOrEquals"));
+        }
+
+        Object arg1 = args[0];
+        Object arg2 = args[1];
+        if (arg1 == null || arg2 == null) {
+            throw new PL5Exception(String.format("<= expects two non-null arguments, got %s and %s", arg1, arg2), nameof("lessThanOrEquals"));
+        }
+        else if (arg1 instanceof String s1 && arg2 instanceof String s2) {
+            return s1.compareTo(s2) <= 0;
+        } else if (arg1 instanceof Long l1 && arg2 instanceof Long l2) {
+            return l1 <= l2;
+        } else if (arg1 instanceof Number n1 && arg2 instanceof Number n2) {
+            return n1.doubleValue() <= n2.doubleValue();
+        } else if (arg1.getClass().equals(arg2.getClass()) && arg1 instanceof Comparable<?> comparable) {
+            @SuppressWarnings("unchecked")
+            Comparable<Object> c1 = (Comparable<Object>) comparable;
+            return c1.compareTo(arg2) <= 0;
+        } else {
+            throw new PL5Exception(String.format("<= expects two comparable arguments, got %s and %s", arg1, arg2), nameof("lessThanOrEquals"));
+        }
+    };
+
+    private static final FunctionValue greaterThanOrEquals = args -> {
+        if (args.length != 2) {
+            throw new PL5Exception(String.format(">= expects 2 arguments, got %d", args.length), nameof("greaterThanOrEquals"));
+        }
+
+        Object arg1 = args[0];
+        Object arg2 = args[1];
+        if (arg1 == null || arg2 == null) {
+            throw new PL5Exception(String.format(">= expects two non-null arguments, got %s and %s", arg1, arg2), nameof("greaterThanOrEquals"));
+        }
+        else if (arg1 instanceof String s1 && arg2 instanceof String s2) {
+            return s1.compareTo(s2) >= 0;
+        } else if (arg1 instanceof Long l1 && arg2 instanceof Long l2) {
+            return l1 >= l2;
+        } else if (arg1 instanceof Number n1 && arg2 instanceof Number n2) {
+            return n1.doubleValue() >= n2.doubleValue();
+        } else if (arg1.getClass().equals(arg2.getClass()) && arg1 instanceof Comparable<?> comparable) {
+            @SuppressWarnings("unchecked")
+            Comparable<Object> c1 = (Comparable<Object>) comparable;
+            return c1.compareTo(arg2) >= 0;
+        } else {
+            throw new PL5Exception(String.format(">= expects two comparable arguments, got %s and %s", arg1, arg2), nameof("greaterThanOrEquals"));
+        }
+    };
+
     private static final FunctionValue and = _ -> {
         throw new IllegalCallerException(SINKRATE);
     };
@@ -168,6 +277,51 @@ public final class LibCore {
         @SuppressWarnings("unchecked")
         HashMap<String, Object> newMap = (HashMap<String, Object>) map;
         return newMap.put(s, arg3);
+    };
+
+    public static final FunctionValue parseInt = args -> {
+        if (args.length != 1) {
+            throw new PL5Exception(String.format("parseInt expects 1 argument, got %d", args.length), nameof("parseInt"));
+        }
+
+        Object arg = args[0];
+        if (arg instanceof String s) {
+            try {
+                return Long.parseLong(s);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        } else if (arg instanceof Number number) {
+            return number.longValue();
+        } else {
+            throw new PL5Exception(String.format("parseInt expects a string, got %s", arg), nameof("parseInt"));
+        }
+    };
+
+    public static final FunctionValue parseFloat = args -> {
+        if (args.length != 1) {
+            throw new PL5Exception(String.format("parseFloat expects 1 argument, got %d", args.length), nameof("parseFloat"));
+        }
+
+        Object arg = args[0];
+        if (arg instanceof String s) {
+            try {
+                return Double.parseDouble(s);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        } else if (arg instanceof Number number) {
+            return number.doubleValue();
+        } else {
+            throw new PL5Exception(String.format("parseFloat expects a string, got %s", arg), nameof("parseFloat"));
+        }
+    };
+
+    public static final FunctionValue toString = args -> {
+        if (args.length != 1) {
+            throw new PL5Exception(String.format("toString expects 1 argument, got %d", args.length), nameof("toString"));
+        }
+        return String.valueOf(args[0]);
     };
 
     private static String nameof(String function) {
