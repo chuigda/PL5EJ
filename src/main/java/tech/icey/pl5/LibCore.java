@@ -2,27 +2,34 @@ package tech.icey.pl5;
 
 import org.jetbrains.annotations.Nullable;
 import tech.icey.pl5.rt.InterpretRuntime;
-import tech.icey.pl5.util.Action;
 import tech.icey.pl5.value.FunctionValue;
 import tech.icey.pl5.value.MutablePairValue;
 import tech.icey.pl5.value.PairValue;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class LibCore {
-    public static void register(InterpretRuntime runtime, @Nullable Action<String> onDuplicate) {
+    public static void register(InterpretRuntime runtime, @Nullable Consumer<String> onDuplicate) {
         runtime.registerJavaFunction("cons", cons, onDuplicate);
         runtime.registerJavaFunction("car", car, onDuplicate);
         runtime.registerJavaFunction("cdr", cdr, onDuplicate);
         runtime.registerJavaFunction("set-car!", setCar, onDuplicate);
         runtime.registerJavaFunction("set-cdr!", setCdr, onDuplicate);
         runtime.registerJavaFunction("eq?", eq, onDuplicate);
+        runtime.registerJavaFunction("equals?", eq, onDuplicate);
+        runtime.registerJavaFunction("=", eq, onDuplicate);
         runtime.registerJavaFunction("ne?", ne, onDuplicate);
+        runtime.registerJavaFunction("not-equals?", ne, onDuplicate);
+        runtime.registerJavaFunction("!=", ne, onDuplicate);
+        runtime.registerJavaFunction("<>", ne, onDuplicate);
         runtime.registerJavaFunction("and", and, onDuplicate);
         runtime.registerJavaFunction("or", or, onDuplicate);
     }
 
-    public static FunctionValue cons = args -> {
+    private static final String SINKRATE = "__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED";
+
+    private static final FunctionValue cons = args -> {
         if (args.length != 2) {
             throw new PL5Exception("cons expects 2 arguments", nameof("cons"));
         } else {
@@ -30,7 +37,7 @@ public final class LibCore {
         }
     };
 
-    public static FunctionValue car = args -> {
+    private static final FunctionValue car = args -> {
         if (args.length != 1) {
             throw new PL5Exception("car expects 1 argument", nameof("car"));
         }
@@ -43,7 +50,7 @@ public final class LibCore {
         };
     };
 
-    public static FunctionValue cdr = args -> {
+    private static final FunctionValue cdr = args -> {
         if (args.length != 1) {
             throw new PL5Exception("cdr expects 1 argument", nameof("cdr"));
         }
@@ -56,7 +63,7 @@ public final class LibCore {
         };
     };
 
-    public static FunctionValue setCar = args -> {
+    private static final FunctionValue setCar = args -> {
         if (args.length != 2) {
             throw new PL5Exception("set-car! expects 2 arguments", nameof("setCar"));
         }
@@ -71,7 +78,7 @@ public final class LibCore {
         return null;
     };
 
-    public static FunctionValue setCdr = args -> {
+    private static final FunctionValue setCdr = args -> {
         if (args.length != 2) {
             throw new PL5Exception("set-cdr! expects 2 arguments", nameof("setCdr"));
         }
@@ -86,26 +93,26 @@ public final class LibCore {
         return null;
     };
 
-    public static FunctionValue eq = args -> {
+    private static final FunctionValue eq = args -> {
         if (args.length != 2) {
             throw new PL5Exception("eq? expects 2 arguments", nameof("eq"));
         }
         return Objects.equals(args[0], args[1]);
     };
 
-    public static FunctionValue ne = args -> {
+    private static final FunctionValue ne = args -> {
         if (args.length != 2) {
             throw new PL5Exception("ne? expects 2 arguments", nameof("ne"));
         }
         return !Objects.equals(args[0], args[1]);
     };
 
-    public static FunctionValue and = _ -> {
-        throw new IllegalCallerException("This function should not be called but identified by the interpreter before actually applying arguments to FunctionValue");
+    private static final FunctionValue and = _ -> {
+        throw new IllegalCallerException(SINKRATE);
     };
 
-    public static FunctionValue or = _ -> {
-        throw new IllegalCallerException("This function should not be called but identified by the interpreter before actually applying arguments to FunctionValue");
+    private static final FunctionValue or = _ -> {
+        throw new IllegalCallerException(SINKRATE);
     };
 
     private static String nameof(String function) {

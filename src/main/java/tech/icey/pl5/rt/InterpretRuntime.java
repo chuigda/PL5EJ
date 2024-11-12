@@ -1,10 +1,10 @@
 package tech.icey.pl5.rt;
 
 import org.jetbrains.annotations.Nullable;
-import tech.icey.pl5.util.Action;
 import tech.icey.pl5.value.FunctionValue;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public final class InterpretRuntime {
     private final HashMap<String, Scope> packageScopes;
@@ -16,9 +16,9 @@ public final class InterpretRuntime {
         this.javaFunctions = new HashMap<>();
     }
 
-    public void registerJavaFunction(String name, FunctionValue function, @Nullable Action<String> onDuplicate) {
+    public void registerJavaFunction(String name, FunctionValue function, @Nullable Consumer<String> onDuplicate) {
         if (onDuplicate != null && javaFunctions.containsKey(name)) {
-            onDuplicate.apply(name);
+            onDuplicate.accept(name);
         }
         javaFunctions.put(name, function);
     }
